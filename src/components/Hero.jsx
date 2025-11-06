@@ -1,15 +1,23 @@
+import { useEffect, useState } from 'react';
 import { Rocket, Sparkles } from 'lucide-react';
 import Spline from '@splinetool/react-spline';
 import { motion } from 'framer-motion';
 
 export default function Hero({ onGetStarted }) {
+  // Render Spline only after mount to avoid any SSR/hydration or WebGL init glitches
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   return (
     <section className="relative min-h-[80vh] w-full overflow-hidden bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 text-white">
       <div className="absolute inset-0">
-        <Spline
-          scene="https://prod.spline.design/4k3h1bRp6m4o7WJm/scene.splinecode"
-          style={{ width: '100%', height: '100%' }}
-        />
+        {mounted && (
+          <Spline
+            scene="https://prod.spline.design/4k3h1bRp6m4o7WJm/scene.splinecode"
+            style={{ width: '100%', height: '100%' }}
+          />
+        )}
+        {/* Non-blocking gradient overlays to ensure UI remains interactive even if 3D fails */}
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(56,189,248,0.15),transparent_60%)]" />
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,transparent,rgba(2,6,23,0.85))]" />
       </div>

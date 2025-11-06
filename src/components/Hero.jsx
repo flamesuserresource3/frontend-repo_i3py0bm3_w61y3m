@@ -1,21 +1,53 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Rocket, Sparkles } from 'lucide-react';
 import Spline from '@splinetool/react-spline';
 import { motion } from 'framer-motion';
 
+class SplineBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error, info) {
+    // Non-fatal: swallow Spline errors and keep UI running
+    console.error('Spline render error:', error, info);
+  }
+  render() {
+    if (this.state.hasError) return null;
+    return this.props.children;
+  }
+}
+
 export default function Hero({ onGetStarted }) {
-  // Render Spline only after mount to avoid any SSR/hydration or WebGL init glitches
+  // Render Spline only after mount to avoid hydration/WebGL init glitches
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const [webglSupported, setWebglSupported] = useState(true);
+
+  useEffect(() => {
+    setMounted(true);
+    // WebGL capability check to prevent crashes on unsupported devices
+    try {
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl') || canvas.getContext('webgl2');
+      setWebglSupported(!!gl);
+    } catch {
+      setWebglSupported(false);
+    }
+  }, []);
 
   return (
     <section className="relative min-h-[80vh] w-full overflow-hidden bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 text-white">
       <div className="absolute inset-0">
-        {mounted && (
-          <Spline
-            scene="https://prod.spline.design/4k3h1bRp6m4o7WJm/scene.splinecode"
-            style={{ width: '100%', height: '100%' }}
-          />
+        {mounted && webglSupported && (
+          <SplineBoundary>
+            <Spline
+              scene="https://prod.spline.design/4k3h1bRp6m4o7WJm/scene.splinecode"
+              style={{ width: '100%', height: '100%' }}
+            />
+          </SplineBoundary>
         )}
         {/* Non-blocking gradient overlays to ensure UI remains interactive even if 3D fails */}
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(56,189,248,0.15),transparent_60%)]" />
@@ -49,6 +81,12 @@ export default function Hero({ onGetStarted }) {
         >
           Your AI-powered companion for picking the perfect laptop, phone, tablet, or audio gear—personalized to your needs, budget, and style.
         </motion.p>
+
+        {!webglSupported && (
+          <div className="mt-4 text-sm text-amber-300">
+            Your browser/device doesn’t support WebGL. Showing a lightweight fallback.
+          </div>
+        )}
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}

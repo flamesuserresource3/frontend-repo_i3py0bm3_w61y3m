@@ -1,28 +1,37 @@
-import { useState } from 'react'
+import { useState } from 'react';
+import Hero from './components/Hero';
+import FeatureGrid from './components/FeatureGrid';
+import InteractiveForm from './components/InteractiveForm';
+import Recommendations from './components/Recommendations';
 
-function App() {
-  const [count, setCount] = useState(0)
-
+function Navbar() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">
-          Vibe Coding Platform
-        </h1>
-        <p className="text-gray-600 mb-6">
-          Your AI-powered development environment
-        </p>
-        <div className="text-center">
-          <button
-            onClick={() => setCount(count + 1)}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
-          >
-            Count is {count}
-          </button>
+    <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-slate-950/70 backdrop-blur">
+      <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3 text-white">
+        <div className="text-lg font-semibold">SpecBud</div>
+        <div className="hidden gap-6 text-sm text-slate-300 sm:flex">
+          <a href="#features" className="hover:text-white">Features</a>
+          <a href="#form" className="hover:text-white">Start</a>
         </div>
-      </div>
-    </div>
-  )
+      </nav>
+    </header>
+  );
 }
 
-export default App
+export default function App() {
+  const [query, setQuery] = useState(null);
+  return (
+    <div className="min-h-screen bg-slate-950">
+      <Navbar />
+      <Hero onGetStarted={() => document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' })} />
+      <FeatureGrid />
+      <div id="form">
+        <InteractiveForm onSubmit={(q) => setQuery(q)} />
+      </div>
+      <Recommendations query={query} />
+      <footer className="border-t border-white/10 py-10 text-center text-slate-400">
+        © {new Date().getFullYear()} SpecBud — Built for smarter gadget decisions.
+      </footer>
+    </div>
+  );
+}
